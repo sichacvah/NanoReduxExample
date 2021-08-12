@@ -7,6 +7,7 @@ import { none, exhaustiveCheck } from '../lib/nano-redux/effect/utils'
 export type Model = {
   count: number
 }
+export const makeModel = (count: number) => ({ count })
 
 // MSG
 export enum MsgType {
@@ -25,19 +26,29 @@ export type Msg = typeof decrement | typeof increment
 
 // UPDATE
 
-export const update = (msg: Msg, model: Model): Pair<Model, Effect<Msg>> => {
+export const update = (
+  msg: Msg,
+  model: Model,
+): Pair<Model, Effect<Msg>> => {
   switch (msg.type) {
     case MsgType.DECREMENT:
-      return pair({...model, count: model.count - 1}, none())
+      return pair(
+        {...model, count: model.count - 1},
+        none()
+      )
     case MsgType.INCREMENT:
-      return pair({...model, count: model.count + 1}, none())
-    default:
-      return exhaustiveCheck(msg.type)
+      return pair(
+        {...model, count: model.count + 1},
+        none()
+      )
   }
+
+  return exhaustiveCheck(msg.type)
 }
 
 // INIT
-export const init = () => pair<Model, Effect<Msg>>({
-  count: 0
-}, none())
+export const init = () => pair<Model, Effect<Msg>>(
+  {count: 0},
+  none()
+)
 

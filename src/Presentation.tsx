@@ -1,6 +1,6 @@
 import React from 'react'
 import {
-  ScrollView,
+  ScrollView, StyleSheet,
 } from 'react-native';
 import {Row, SquareButton, P} from './UIKit'
 import {AtomRuntime} from '../lib/nano-redux/atom/atomRuntime'
@@ -20,14 +20,22 @@ export const Counter = () => {
   const dispatch = useDispatch<Msg>()
   const state = useStoreState<Model>()
   return (
-    <ScrollView style={{ paddingHorizontal: 20, paddingVertical: 50 }}>
+    <ScrollView style={styles.container}>
       <Row>
-        <SquareButton onPress={() => dispatch(decrement)} title="−" />
+        <SquareButton
+          onPress={() => dispatch(decrement)}
+          title="−" />
         <P>{state.count}</P>
-        <SquareButton onPress={() => dispatch(increment)} title="+" />
+        <SquareButton
+          onPress={() => dispatch(increment)}
+          title="+" />
       </Row>
     </ScrollView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: { paddingHorizontal: 20, paddingVertical: 50 }
+})
 
 

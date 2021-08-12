@@ -10,7 +10,7 @@ export type Props<Model, Msg> = {
 }
 
 
-export const StoreContext = React.createContext<ReadonlyAtom<any>>(undefined)
+export const StoreContext = React.createContext<ReadonlyAtom<any>>(undefined as any)
 
 
 export const DispatchContext = React.createContext<Dispatch<any>>(() => {})
