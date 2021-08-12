@@ -22,7 +22,7 @@ export const Counter = () => {
   return (
     <ScrollView style={{ paddingHorizontal: 20, paddingVertical: 50 }}>
       <Row>
-        <SquareButton onPress={() => dispatch(decrement)} title="-" />
+        <SquareButton onPress={() => dispatch(decrement)} title="−" />
         <P>{state.count}</P>
         <SquareButton onPress={() => dispatch(increment)} title="+" />
       </Row>

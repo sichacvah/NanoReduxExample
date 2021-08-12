@@ -1,5 +1,5 @@
 import { pair, Pair, Effect } from '../lib/nano-redux/types'
-import { none } from '../lib/nano-redux/effect/utils'
+import { none, exhaustiveCheck } from '../lib/nano-redux/effect/utils'
 
 
 // MODEL
@@ -31,9 +31,13 @@ export const update = (msg: Msg, model: Model): Pair<Model, Effect<Msg>> => {
       return pair({...model, count: model.count - 1}, none())
     case MsgType.INCREMENT:
       return pair({...model, count: model.count + 1}, none())
+    default:
+      return exhaustiveCheck(msg.type)
   }
 }
 
 // INIT
-export const init = () => pair<Model, Effect<Msg>>({count: 0}, none())
+export const init = () => pair<Model, Effect<Msg>>({
+  count: 0
+}, none())
 
