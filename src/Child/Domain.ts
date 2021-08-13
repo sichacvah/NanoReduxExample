@@ -1,5 +1,5 @@
-import { pair, Pair, Effect, TypedData } from '../lib/nano-redux/types'
-import { exhaustiveCheck } from '../lib/nano-redux/effect/utils'
+import { pair, Pair, Effect, TypedData } from '../../lib/nano-redux/types'
+import { exhaustiveCheck } from '../../lib/nano-redux/effect/utils'
 
 
 // MODEL
@@ -46,6 +46,7 @@ const updateModel = (msg: Msg, model: Model): Model => {
   return exhaustiveCheck(msg)
 }
 
+export type Update = ReturnType<typeof update>
 export const update = (putCount: PutCount) => (
   msg: Msg,
   model: Model,

@@ -1,4 +1,4 @@
-import { decrement, increment, init as makeInit, makeModel, update as makeUpdate } from '../src/Domain'
+import { decrement, increment, init as makeInit, makeModel, update as makeUpdate } from '../src/Child/Domain'
 
 const init = makeInit(async () => 0)
 const update = makeUpdate(() => Promise.resolve())

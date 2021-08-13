@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import type { GetCount, PutCount } from './Domain'
+import type { GetCounts, PutCounts } from './Parent/Domain'
 
 export class PersistService {
   private key: string
@@ -8,15 +8,18 @@ export class PersistService {
     this.key = key
   }
 
-  getCount: GetCount = async () => {
+  getCounts: GetCounts = async () => {
     const value = await AsyncStorage.getItem(this.key)
-    return JSON.parse(value || '0')
+    console.log('value', value)
+    if (!value) return { byId: {}, ids: [] }
+    return JSON.parse(value)
   }
 
-  putCount: PutCount = async (count) => {
+  putCounts: PutCounts = async (counts) => {
+    console.log('counts', counts)
     await AsyncStorage.setItem(
       this.key,
-      `${count}`
+      JSON.stringify(counts)
     )
   }
 }

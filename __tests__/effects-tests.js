@@ -5,7 +5,7 @@ import {
   PutCount,
   setCount,
   update
-} from '../src/Domain'
+} from '../src/Child/Domain'
 
 describe('Effects', () => {
   test('initial Effect should dispatch SetCount', async () => {
