@@ -1,8 +1,12 @@
 
-export type TypedData<T, Data = undefined> = Data extends undefined ? {
-  type: T
-} : { type: T, data: Data }
-export type Pair<F, S> = { first: F, second: S } & [first: F, second: S]
+export type TypedData<T, Data = undefined> =
+  Data extends undefined ?
+  { type: T } :
+  { type: T, data: Data }
+
+export type Pair<F, S> = { first: F, second: S } &
+  [first: F, second: S]
+
 export const pair = <F, S>(first: F, second: S) => {
   let arr = [first, second] as Pair<F, S>
   arr.first = first

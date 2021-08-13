@@ -14,6 +14,7 @@ export const runtime = <Model, Msg>(
   const dispatch = (msg: Msg) => {
     step(update(msg, currentState))
   }
+
   const step = (next: Pair<Model, Effect<Msg>>) => {
     const [state, effect] = next
     currentState = state
