@@ -1,6 +1,7 @@
-import { decrement, increment, init, makeModel, update } from '../src/Domain'
+import { decrement, increment, init as makeInit, makeModel, update as makeUpdate } from '../src/Domain'
 
-
+const init = makeInit(async () => 0)
+const update = makeUpdate(() => Promise.resolve())
 describe('Model', () => {
   test('initial Model count should be 0', () => {
     const expected = init()
