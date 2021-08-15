@@ -10,13 +10,11 @@ export class PersistService {
 
   getCounts: GetCounts = async () => {
     const value = await AsyncStorage.getItem(this.key)
-    console.log('value', value)
     if (!value) return { byId: {}, ids: [] }
     return JSON.parse(value)
   }
 
   putCounts: PutCounts = async (counts) => {
-    console.log('counts', counts)
     await AsyncStorage.setItem(
       this.key,
       JSON.stringify(counts)

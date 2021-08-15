@@ -104,43 +104,48 @@ const updateAddCounter = (getCounts: GetCounts) => (_: AddCounter, model: Model)
 }
 
 
-const updateRemoveCounter = (putCounts: PutCounts) => (msg: RemoveCounter, model: Model): Pair<Model, Effect<Msg>> => {
-  const putCountsEffect = makePutCountsEffect(putCounts)
-  const nextModel = OrderedObject.remove(model, msg.data.id)
-  const counts = OrderedObject.map(nextModel, (v) => v.count)
+const updateRemoveCounter = (putCounts: PutCounts) =>
+  (msg: RemoveCounter, model: Model): Pair<Model, Effect<Msg>> => {
+    const putCountsEffect = makePutCountsEffect(putCounts)
+    const nextModel = OrderedObject.remove(model, msg.data.id)
+    const counts = OrderedObject.map(nextModel, (v) => v.count)
 
-  return pair(
-    nextModel,
-    putCountsEffect(counts)
-  )
-}
+    return pair(
+      nextModel,
+      putCountsEffect(counts)
+    )
+  }
 
 const updateSetCounts = (msg: SetCounters, _: Model): Pair<Model, Effect<Msg>> => {
   const counts = msg.data
-  const nextModel = OrderedObject.map(counts, (count) => counter.makeModel(count))
   return pair(
-    nextModel,
+    OrderedObject.map(counts, (count) => counter.makeModel(count)),
     none()
   )
 }
 
 
 
-const updateCounterMsg = (putCounts: PutCounts) => (msg: CounterMsg, model: Model): Pair<Model, Effect<Msg>> => {
-  const value = model.byId[msg.data.id]
-  if (!value) return pair(model, none())
+const updateCounterMsg = (putCounts: PutCounts) =>
+  (msg: CounterMsg, model: Model): Pair<Model, Effect<Msg>> => {
+    const value = model.byId[msg.data.id]
+    if (!value) return pair(model, none())
 
-  const putCount: counter.PutCount = async (count) => {
-    const counts = OrderedObject.set(OrderedObject.map(model, (v) => v.count), msg.data.id, count)
-    await putCounts(counts)
+    const putCount: counter.PutCount = async (count) => {
+      const counts = OrderedObject.set(
+        OrderedObject.map(model, (v) => v.count),
+        msg.data.id,
+        count
+      )
+      await putCounts(counts)
+    }
+
+    const [counterModel, counterEffect] = counter.update(putCount)(msg.data.msg, value)
+    return pair(
+      OrderedObject.set(model, msg.data.id, counterModel),
+      map(counterEffect, (m) => counterMsg(msg.data.id, m))
+    )
   }
-
-  const [counterModel, counterEffect] = counter.update(putCount)(msg.data.msg, value)
-  return pair(
-    OrderedObject.set(model, msg.data.id, counterModel),
-    map(counterEffect, (m) => counterMsg(msg.data.id, m))
-  )
-}
 
 export const update = (putCounts: PutCounts, getCounts: GetCounts) => (msg: Msg, model: Model): Pair<Model, Effect<Msg>> => {
   switch (msg.type) {
