@@ -8,7 +8,7 @@ import {
 } from 'react-native'
 import { Counter } from '../Child/Presentation'
 import { Msg as ChildMsg } from '../Child/Domain'
-import { BottomButton, Row, SquareButton } from '../UIKit'
+import { BottomButton, SquareButton } from '../UIKit'
 
 type Props = {
   dispatch: Dispatch<Msg>,

@@ -2,35 +2,51 @@ import { Effect, pair, Pair, TypedData } from '../../lib/nano-redux/types'
 import { map, none } from '../../lib/nano-redux/effect/utils'
 import * as counter from '../Child/Domain'
 
-
-export type Model = {
-  ids: number[]
-  byId: Record<number, counter.Model>
-}
-
-type NModel<K extends keyof any, T> = {
+type OrderedObjectType<K extends keyof any, V> = {
   ids: K[],
-  byId: Record<K, T>
+  byId: Record<K, V>
 }
 
-const add = <K extends keyof any, T>(model: NModel<K, T>, key: K, value: T): NModel<K, T> => {
-  return {
-    ...model,
-    ids: model.ids.concat([key]),
-    byId: {
-      ...model.byId,
-      [key]: value
+const OrderedObject = {
+  remove: <K extends keyof any, V>(obj: OrderedObjectType<K, V>, key: K) => {
+    const copy = {...obj.byId}
+    delete copy[key]
+    console.log(key, typeof key)
+    return {
+      byId: copy,
+      ids: obj.ids.filter(k => k !== key)
+    }
+  },
+  map: <K extends keyof any, V, V2>(obj: OrderedObjectType<K, V>, f: (v: V) => V2): OrderedObjectType<K, V2> => {
+    return {
+      ids: obj.ids,
+      byId: obj.ids.reduce((acc, key) => {
+        return {
+          ...acc,
+          [key]: f(obj.byId[key])
+        }
+      }, {} as Record<K, V2>)
+    }
+  },
+  set: <K extends keyof any, V>(obj: OrderedObjectType<K, V>, key: K, value: V) => {
+    const {ids, byId} = obj
+    return {
+      ids: ids.includes(key) ? ids : ids.concat([key]),
+      byId: {
+        ...byId,
+        [key]: value
+      }
     }
   }
 }
 
 
 
+export type Model = OrderedObjectType<number, counter.Model>
 enum MsgType {
   SET_COUNTERS = 'SET_COUNTERS',
   ADD_COUNTER = 'ADD_COUNTER',
   REMOVE_COUNTER = 'REMOVE_COUNTER',
-
   COUNTER_MSG = 'COUNTER_MSG'
 }
 
@@ -73,7 +89,7 @@ export const init = (getCounts: GetCounts) => (): Pair<Model, Effect<Msg>> => pa
   makeGetCountsEffect(getCounts)
 )
 
-const updateAddCounter = (getCounts: GetCounts) => (msg: AddCounter, model: Model): Pair<Model, Effect<Msg>> => {
+const updateAddCounter = (getCounts: GetCounts) => (_: AddCounter, model: Model): Pair<Model, Effect<Msg>> => {
   const counterKey = nextCounterID(model)
   const getCount = async () => {
     const { byId } = await getCounts()
@@ -82,14 +98,7 @@ const updateAddCounter = (getCounts: GetCounts) => (msg: AddCounter, model: Mode
   const [counterModel, counterEffect] = counter.init(getCount)()
   
   return pair(
-    {
-      ...model,
-      ids: model.ids.concat(counterKey),
-      byId: {
-        ...model.byId,
-        [counterKey]: counterModel
-      }
-    },
+    OrderedObject.set(model, counterKey, counterModel),
     map(counterEffect, (msg) => counterMsg(counterKey, msg))
   )
 }
@@ -97,17 +106,8 @@ const updateAddCounter = (getCounts: GetCounts) => (msg: AddCounter, model: Mode
 
 const updateRemoveCounter = (putCounts: PutCounts) => (msg: RemoveCounter, model: Model): Pair<Model, Effect<Msg>> => {
   const putCountsEffect = makePutCountsEffect(putCounts)
-  const byId = {...model.byId}
-  delete byId[msg.data.id]
-  const nextModel = {
-    ...model,
-    byId,
-    ids: model.ids.filter(id => id !== msg.data.id) 
-  }
-  const counts = {
-    ...nextModel,
-    byId: Object.fromEntries(Object.entries(nextModel.byId).map(([id, m]) => [id, m.count]))
-  }
+  const nextModel = OrderedObject.remove(model, msg.data.id)
+  const counts = OrderedObject.map(nextModel, (v) => v.count)
 
   return pair(
     nextModel,
@@ -115,13 +115,9 @@ const updateRemoveCounter = (putCounts: PutCounts) => (msg: RemoveCounter, model
   )
 }
 
-const updateSetCounts = (msg: SetCounters, model: Model): Pair<Model, Effect<Msg>> => {
+const updateSetCounts = (msg: SetCounters, _: Model): Pair<Model, Effect<Msg>> => {
   const counts = msg.data
-
-  const nextModel: Model = {
-    ids: counts.ids,
-    byId: Object.fromEntries(counts.ids.map(id => [id, counter.makeModel(counts.byId[id])]))
-  }
+  const nextModel = OrderedObject.map(counts, (count) => counter.makeModel(count))
   return pair(
     nextModel,
     none()
@@ -135,23 +131,13 @@ const updateCounterMsg = (putCounts: PutCounts) => (msg: CounterMsg, model: Mode
   if (!value) return pair(model, none())
 
   const putCount: counter.PutCount = async (count) => {
-    const counts = {
-      ids: model.ids,
-      byId: Object.fromEntries(Object.entries(model.byId).map(([id, m]) => [id, m.count]).concat([[msg.data.id, count]]))
-
-    }
+    const counts = OrderedObject.set(OrderedObject.map(model, (v) => v.count), msg.data.id, count)
     await putCounts(counts)
   }
 
   const [counterModel, counterEffect] = counter.update(putCount)(msg.data.msg, value)
   return pair(
-    {
-      ...model,
-      byId: {
-        ...model.byId,
-        [msg.data.id]: counterModel
-      }
-    },
+    OrderedObject.set(model, msg.data.id, counterModel),
     map(counterEffect, (m) => counterMsg(msg.data.id, m))
   )
 }
