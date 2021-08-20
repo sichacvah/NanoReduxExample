@@ -1,13 +1,13 @@
 import React from 'react';
 import { applicationContainer } from './src/ApplicationContainer'
-import { Counter, Root } from './src/Presentation'
+import { ProductsScreen, Root } from './src/Presentation'
 
 const App = () => {
   const {store, dispatch} = applicationContainer()
 
   return (
     <Root store={store} dispatch={dispatch}>
-      <Counter />
+      <ProductsScreen />
     </Root>
   )
 }

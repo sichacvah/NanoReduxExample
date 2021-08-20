@@ -1,13 +1,13 @@
-import { update, init } from './Parent/Domain'
 import { atomRuntime } from '../lib/nano-redux/atom/atomRuntime'
-import { PersistService } from './Services'
+import { ProductsInteractor } from './Products/ProductsInteractor'
+import { update, init } from './Products/Domain'
 
 export const applicationContainer = () => {
-  const KEY = 'COUNTERS_KEY'
-  const persistService = new PersistService(KEY)
+  const storeId = 4208
+  const productsInteractor = new ProductsInteractor(storeId)
   const { store, dispatch } = atomRuntime(
-    init(persistService.getCounts),
-    update(persistService.putCounts, persistService.getCounts)
+    init,
+    update(productsInteractor.fetchProducts, productsInteractor.showAlert)
   )
 
   return {
