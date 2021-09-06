@@ -5,13 +5,14 @@ import { PersistService } from './Services'
 export const applicationContainer = () => {
   const KEY = 'COUNTERS_KEY'
   const persistService = new PersistService(KEY)
-  const { store, dispatch } = atomRuntime(
+  const { store, dispatch, dispose } = atomRuntime(
     init(persistService.getCounts),
     update(persistService.putCounts, persistService.getCounts)
   )
 
   return {
     store,
-    dispatch
+    dispatch,
+    dispose
   }
 }
