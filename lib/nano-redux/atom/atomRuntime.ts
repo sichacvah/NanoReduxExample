@@ -5,6 +5,7 @@ import { Effect, Dispatch, Pair } from '../types'
 export type AtomRuntime<Model, Msg> = {
   store: ReadonlyAtom<Model>
   dispatch: Dispatch<Msg>
+  dispose: () => void
 }
 
 export const atomRuntime = <Model, Msg>(
@@ -25,7 +26,7 @@ export const atomRuntime = <Model, Msg>(
     dispatch = nextDispatch
   }
 
-  runtime(
+  const {dispose} = runtime(
     init,
     update,
     render
@@ -34,5 +35,6 @@ export const atomRuntime = <Model, Msg>(
   return {
     store: atomState,
     dispatch,
+    dispose
   }
 }

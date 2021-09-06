@@ -14,7 +14,9 @@ export const pair = <F, S>(first: F, second: S) => {
   return arr
 }
 export type Dispatch<Msg> = (msg: Msg) => void
-export type Effect<Msg> = (dispatch: Dispatch<Msg>) => Promise<any>
+
+export type DisposeCb = () => void
+export type Effect<Msg> = (dispatch: Dispatch<Msg>, onDispose: (cb: DisposeCb) => void) => Promise<any>
 
 export const init = <Model, Msg>(block: () => Pair<Model, Effect<Msg>>) => block
 export const effect = <Msg>(block: Effect<Msg>) => block
